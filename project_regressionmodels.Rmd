@@ -1,0 +1,57 @@
+# The Effect of Transmission on MPG
+## Overview
+Our goal in this paper is to look at the mtcars data set and answer two questions:
+* Is an automatic or manual transmission better for MPG?
+* What is the quantitative difference in MPG between automatic and manual transmissions?
+
+## Direct Relationship
+We begin by plotting the available data with a simple box plot of miles per gallon (MPG) versus transmission (0 = "Automatic", 1 = "Manual") (see Appendix of Figures). This plot motivates us to build a linear regression for MPG over transmission.
+
+We also plot the MPG against the individual variables. Whenever applicable, we color cars with manual transmissions magenta and cars with automatic transmissions blue (see Appendix of Figures). From the plots, we make some visual observations:
+* Every variable appears to have some nonzero correlation with MPG.
+* Some variables show grouping between automatic and manual transmissions, suggesting a connection between variables.
+* Gross horsepower and displacement slightly display nonlinear relationships with MPG. 
+After looking at the plots, we choose to build a second linear regression for MPG over weight, V/S engine, and transmission.
+
+To keep the analysis short, we also build a third linear regression for MPG over at all available variables.
+
+```{r models, echo = TRUE}
+modelOnAM <- lm(mpg ~ am, data = mtcars)
+model <- lm(mpg ~ (wt + vs + am), data = mtcars)
+#modelSOME <- lm(mpg ~ (wt + vs + am + hp + disp), data = mtcars)
+modelALL <- lm(mpg ~ ., data = mtcars)
+anova(modelOnAM, model, modelALL)
+```
+
+The ANOVA table informs us that the second model should be accepted over the first, and there is not enough statistical evidence to accept the third model over the second. We print the summary of the intermediate model: 
+```{r select, echo = TRUE}
+summary(model)$coefficients
+```
+
+## Results
+Preliminary analysis shows that cars with manual transmission are expected to have 1.4913 higher MPGs than cars with automatic transmission, but comes with a p-value of .3242. As such, it is not clear whether or not the type of transmission has an impact on MPG.
+
+Further analysis, outside the scope of this article, may also consist of the following:
+* Research into the physical/mechanical relationships amongst the variables.
+* Use nonlinear or locally linear models in place of linear models.
+* Use principal components analysis.
+* Plot variables against gallons per mile, the multiplicative inverse of MPG, and draw conclusions from there.
+
+## Appendix of Figures
+
+```{r figures, echo = FALSE, fig.height=4, fig.width=8}
+palette(c("blue", "magenta"))
+par(mfrow=c(1,2))
+boxplot(mtcars$mpg ~ mtcars$am, names = c("automatic", "manual"), ylab = "MPG")
+data <- mtcars ; data$am <- factor(data$am, labels = c(1,2))
+plot(data$cyl, data$mpg, col = data$am, xlab = "Number of cylinders", ylab = "MPG")
+plot(data$disp, data$mpg, col = data$am, xlab = "Displacement (cu.in.)", ylab = "MPG") 
+plot(data$hp, data$mpg, col = data$am, xlab = "Gross horsepower", ylab = "MPG")
+plot(data$drat, data$mpg, col = data$am, xlab = "Rear axle ratio", ylab = "MPG") 
+plot(data$wt, data$mpg, col = data$am, xlab = "Weight", ylab = "MPG")
+plot(data$qsec, data$mpg, col = data$am, xlab = "Quarter mile time", ylab = "MPG")
+boxplot(mtcars$mpg ~ (mtcars$vs + mtcars$am), 
+        names = c("V,a", "straight,a", "V,m", "straight,m"), ylab = "MPG")
+plot(data$gear, data$mpg, col = data$am, xlab = "Number of forward gears", ylab = "MPG") 
+plot(data$carb, data$mpg, col = data$am, xlab = "Number of carburetors", ylab = "MPG")
+```
