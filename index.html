@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>The Effect of Transmission on MPG</title>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>The Effect of Transmission on MPG</h1>
+
+<h2>Overview</h2>
+
+<p>Our goal in this paper is to look at the mtcars data set and answer two questions:</p>
+
+<ul>
+<li>Is an automatic or manual transmission better for MPG?</li>
+<li>What is the quantitative difference in MPG between automatic and manual transmissions?</li>
+</ul>
+
+<h2>Direct Relationship</h2>
+
+<p>We begin by plotting the available data with a simple box plot of miles per gallon (MPG) versus transmission (0 = &quot;Automatic&quot;, 1 = &quot;Manual&quot;) (see Appendix of Figures). This plot motivates us to build a linear regression for MPG over transmission.</p>
+
+<p>We also plot the MPG against the individual variables. Whenever applicable, we color cars with manual transmissions magenta and cars with automatic transmissions blue (see Appendix of Figures). From the plots, we make some visual observations:</p>
+
+<ul>
+<li>Every variable appears to have some nonzero correlation with MPG.</li>
+<li>Some variables show grouping between automatic and manual transmissions, suggesting a connection between variables.</li>
+<li>Gross horsepower and displacement slightly display nonlinear relationships with MPG. 
+After looking at the plots, we choose to build a second linear regression for MPG over weight, V/S engine, and transmission.</li>
+</ul>
+
+<p>To keep the analysis short, we also build a third linear regression for MPG over at all available variables.</p>
+
+<pre><code class="r">modelOnAM &lt;- lm(mpg ~ am, data = mtcars)
+model &lt;- lm(mpg ~ (wt + vs + am), data = mtcars)
+#modelSOME &lt;- lm(mpg ~ (wt + vs + am + hp + disp), data = mtcars)
+modelALL &lt;- lm(mpg ~ ., data = mtcars)
+anova(modelOnAM, model, modelALL)
+</code></pre>
+
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: mpg ~ am
+## Model 2: mpg ~ (wt + vs + am)
+## Model 3: mpg ~ cyl + disp + hp + drat + wt + qsec + vs + am + gear + carb
+##   Res.Df RSS Df Sum of Sq    F  Pr(&gt;F)    
+## 1     30 721                              
+## 2     28 216  2       505 35.9 1.7e-07 ***
+## 3     21 147  7        69  1.4    0.26    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<p>The ANOVA table informs us that the second model should be accepted over the first, and there is not enough statistical evidence to accept the third model over the second. We print the summary of the intermediate model: </p>
+
+<pre><code class="r">summary(model)$coefficients
+</code></pre>
+
+<pre><code>##             Estimate Std. Error t value  Pr(&gt;|t|)
+## (Intercept)   30.079     3.7480   8.025 9.710e-09
+## wt            -3.784     0.8981  -4.214 2.363e-04
+## vs             3.615     1.2761   2.833 8.454e-03
+## am             1.491     1.4863   1.003 3.243e-01
+</code></pre>
+
+<h2>Results</h2>
+
+<p>Preliminary analysis shows that cars with manual transmission are expected to have 1.4913 higher MPGs than cars with automatic transmission, but comes with a p-value of .3242. As such, it is not clear whether or not the type of transmission has an impact on MPG.</p>
+
+<p>Further analysis, outside the scope of this article, may also consist of the following:</p>
+
+<ul>
+<li>Research into the physical/mechanical relationships amongst the variables.</li>
+<li>Use nonlinear or locally linear models in place of linear models.</li>
+<li>Use principal components analysis.</li>
+<li>Plot variables against gallons per mile, the multiplicative inverse of MPG, and draw conclusions from there.</li>
+</ul>
+
+<h2>Appendix of Figures</h2>
+
+<p><img src="figure/figures1.png" alt="plot of chunk figures"> <img src="figure/figures2.png" alt="plot of chunk figures"> <img src="figure/figures3.png" alt="plot of chunk figures"> <img src="figure/figures4.png" alt="plot of chunk figures"> <img src="figure/figures5.png" alt="plot of chunk figures"> </p>
+
+</body>
+
+</html>
